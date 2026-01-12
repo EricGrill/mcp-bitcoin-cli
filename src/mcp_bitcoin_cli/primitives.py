@@ -67,15 +67,23 @@ def decode_op_return_script(script: bytes) -> bytes:
         # Direct push
         length = push_byte
     elif push_byte == OP_PUSHDATA1:
+        if pos >= len(script):
+            raise ValueError("Truncated PUSHDATA1 script")
         length = script[pos]
         pos += 1
     elif push_byte == OP_PUSHDATA2:
+        if pos + 2 > len(script):
+            raise ValueError("Truncated PUSHDATA2 script")
         length = int.from_bytes(script[pos:pos+2], 'little')
         pos += 2
     elif push_byte == OP_PUSHDATA4:
+        if pos + 4 > len(script):
+            raise ValueError("Truncated PUSHDATA4 script")
         length = int.from_bytes(script[pos:pos+4], 'little')
         pos += 4
     else:
         raise ValueError(f"Invalid push opcode: {push_byte:#x}")
 
+    if pos + length > len(script):
+        raise ValueError(f"Script truncated: expected {length} bytes, got {len(script) - pos}")
     return script[pos:pos+length]
