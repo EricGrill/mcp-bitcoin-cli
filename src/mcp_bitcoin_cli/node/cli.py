@@ -155,7 +155,7 @@ class BitcoinCLI(NodeInterface):
     async def test_mempool_accept(self, tx_hex: str) -> dict[str, Any]:
         """Test if transaction would be accepted (dry run)."""
         # testmempoolaccept expects an array
-        result = await self._call("testmempoolaccept", f'["{tx_hex}"]')
+        result = await self._call("testmempoolaccept", json.dumps([tx_hex]))
         return result[0] if result else {"allowed": False}
 
     async def create_raw_transaction(
