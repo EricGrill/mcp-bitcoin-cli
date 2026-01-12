@@ -81,3 +81,37 @@ class TestEnvelopeTypes:
 
         assert decoded.type == env_type
         assert decoded.payload == data
+
+
+class TestCustomEnvelopeTypes:
+    """Test custom envelope types (0x80+)."""
+
+    def test_decode_custom_type(self):
+        """Decode envelope with custom type byte (0x80+)."""
+        # Create a custom envelope with type 0x80
+        custom_envelope = MAGIC_BYTES + bytes([VERSION, 0x80]) + b"custom payload"
+        decoded = decode_envelope(custom_envelope)
+
+        assert decoded.magic == MAGIC_BYTES
+        assert decoded.version == VERSION
+        # Custom type should be stored as raw int
+        assert decoded.type == 0x80
+        assert isinstance(decoded.type, int)
+        assert decoded.payload == b"custom payload"
+
+    def test_decode_custom_type_0xFF(self):
+        """Decode envelope with maximum custom type byte (0xFF)."""
+        custom_envelope = MAGIC_BYTES + bytes([VERSION, 0xFF]) + b"max custom"
+        decoded = decode_envelope(custom_envelope)
+
+        assert decoded.type == 0xFF
+        assert isinstance(decoded.type, int)
+        assert decoded.payload == b"max custom"
+
+    def test_reject_unknown_non_custom_type(self):
+        """Reject envelope with unknown type byte below 0x80."""
+        # Type 0x50 is not defined and below 0x80
+        invalid_envelope = MAGIC_BYTES + bytes([VERSION, 0x50]) + b"payload"
+
+        with pytest.raises(ValueError, match="Unknown envelope type"):
+            decode_envelope(invalid_envelope)

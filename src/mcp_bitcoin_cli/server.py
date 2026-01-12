@@ -66,7 +66,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
             Dictionary with 'script_hex' containing the OP_RETURN script.
         """
         if encoding == "hex":
-            data_bytes = bytes.fromhex(data)
+            try:
+                data_bytes = bytes.fromhex(data)
+            except ValueError as e:
+                return {"error": f"Invalid hex string: {e}"}
         else:
             data_bytes = data.encode(encoding)
 
@@ -83,7 +86,11 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
         Returns:
             Dictionary with 'data_hex' and 'data_utf8' (if decodable).
         """
-        script = bytes.fromhex(script_hex)
+        try:
+            script = bytes.fromhex(script_hex)
+        except ValueError as e:
+            return {"error": f"Invalid hex string: {e}"}
+
         data = decode_op_return_script(script)
 
         result = {"data_hex": data.hex()}
@@ -118,7 +125,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
             Dictionary with 'script_hex' for the OP_RETURN output.
         """
         if encoding == "hex":
-            data_bytes = bytes.fromhex(data)
+            try:
+                data_bytes = bytes.fromhex(data)
+            except ValueError as e:
+                return {"error": f"Invalid hex string: {e}"}
         else:
             data_bytes = data.encode(encoding)
 
@@ -151,14 +161,27 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
         Returns:
             Dictionary with envelope fields: magic, version, type, payload_hex.
         """
-        data = bytes.fromhex(data_hex)
+        try:
+            data = bytes.fromhex(data_hex)
+        except ValueError as e:
+            return {"error": f"Invalid hex string: {e}"}
+
         envelope = decode_envelope(data)
+
+        # Handle both EnvelopeType enum and raw int for custom types
+        if isinstance(envelope.type, EnvelopeType):
+            type_name = envelope.type.name
+            type_value = envelope.type.value
+        else:
+            # Custom type stored as raw int
+            type_name = f"CUSTOM_{envelope.type:#x}"
+            type_value = envelope.type
 
         result = {
             "magic": envelope.magic.decode("ascii"),
             "version": envelope.version,
-            "type": envelope.type.name,
-            "type_value": envelope.type.value,
+            "type": type_name,
+            "type_value": type_value,
             "payload_hex": envelope.payload.hex(),
         }
 
@@ -420,7 +443,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
             Dictionary with prepared document data for embedding.
         """
         if encoding == "hex":
-            content_bytes = bytes.fromhex(content)
+            try:
+                content_bytes = bytes.fromhex(content)
+            except ValueError as e:
+                return {"error": f"Invalid hex string: {e}"}
         else:
             content_bytes = content.encode(encoding)
 
@@ -454,7 +480,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
         Returns:
             Dictionary with parsed document content.
         """
-        data = bytes.fromhex(data_hex)
+        try:
+            data = bytes.fromhex(data_hex)
+        except ValueError as e:
+            return {"error": f"Invalid hex string: {e}"}
 
         # Try to decode as envelope first
         try:
@@ -479,9 +508,16 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
                 content_type = "application/octet-stream"
                 content = payload
 
+            # Handle both EnvelopeType enum and raw int for custom types
+            if isinstance(envelope.type, EnvelopeType):
+                envelope_type_name = envelope.type.name
+            else:
+                # Custom type stored as raw int
+                envelope_type_name = f"CUSTOM_{envelope.type:#x}"
+
             result = {
                 "is_envelope": True,
-                "envelope_type": envelope.type.name,
+                "envelope_type": envelope_type_name,
                 "content_type": content_type,
                 "content_hex": content.hex(),
             }
@@ -528,7 +564,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
             Dictionary with hash and prepared script for embedding.
         """
         if encoding == "hex":
-            data_bytes = bytes.fromhex(data)
+            try:
+                data_bytes = bytes.fromhex(data)
+            except ValueError as e:
+                return {"error": f"Invalid hex string: {e}"}
         else:
             data_bytes = data.encode(encoding)
 
@@ -567,7 +606,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
             Dictionary with verification result.
         """
         if encoding == "hex":
-            data_bytes = bytes.fromhex(data)
+            try:
+                data_bytes = bytes.fromhex(data)
+            except ValueError as e:
+                return {"error": f"Invalid hex string for data: {e}"}
         else:
             data_bytes = data.encode(encoding)
 
@@ -576,7 +618,10 @@ def create_server(config: Optional[Config] = None) -> FastMCP:
         else:
             computed_hash = hashlib.sha256(data_bytes).digest()
 
-        expected_bytes = bytes.fromhex(expected_hash)
+        try:
+            expected_bytes = bytes.fromhex(expected_hash)
+        except ValueError as e:
+            return {"error": f"Invalid hex string for expected_hash: {e}"}
 
         match = computed_hash == expected_bytes
 

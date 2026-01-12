@@ -9,6 +9,7 @@ The envelope format:
 
 from dataclasses import dataclass
 from enum import IntEnum
+from typing import Union
 
 
 MAGIC_BYTES = b"BTCD"
@@ -29,11 +30,15 @@ class EnvelopeType(IntEnum):
 
 @dataclass
 class Envelope:
-    """Decoded envelope structure."""
+    """Decoded envelope structure.
+
+    The type field can be an EnvelopeType for known types, or an int
+    for custom types (0x80-0xFF).
+    """
 
     magic: bytes
     version: int
-    type: EnvelopeType
+    type: Union[EnvelopeType, int]
     payload: bytes
 
 
@@ -74,11 +79,11 @@ def decode_envelope(data: bytes) -> Envelope:
     payload = data[6:]
 
     try:
-        envelope_type = EnvelopeType(type_byte)
+        envelope_type: Union[EnvelopeType, int] = EnvelopeType(type_byte)
     except ValueError:
-        # Allow custom types (0x80+)
+        # Allow custom types (0x80+) - store as raw int
         if type_byte >= 0x80:
-            envelope_type = EnvelopeType(type_byte)
+            envelope_type = type_byte
         else:
             raise ValueError(f"Unknown envelope type: {type_byte:#x}")
 
