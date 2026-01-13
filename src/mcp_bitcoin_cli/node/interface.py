@@ -42,7 +42,7 @@ class NodeInterface(ABC):
     @abstractmethod
     async def get_info(self) -> NodeInfo:
         """Get node status and network info."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def list_utxos(
@@ -51,12 +51,12 @@ class NodeInterface(ABC):
         min_amount: float = 0,
     ) -> list[UTXO]:
         """List available UTXOs."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def get_transaction(self, txid: str) -> TransactionInfo:
         """Get transaction details."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def send_raw_transaction(
@@ -65,12 +65,12 @@ class NodeInterface(ABC):
         max_fee_rate: Optional[float] = None,
     ) -> str:
         """Broadcast signed transaction, return txid."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def test_mempool_accept(self, tx_hex: str) -> dict[str, Any]:
         """Test if transaction would be accepted (dry run)."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def create_raw_transaction(
@@ -79,7 +79,7 @@ class NodeInterface(ABC):
         outputs: list[dict],
     ) -> str:
         """Create unsigned raw transaction."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def fund_raw_transaction(
@@ -88,14 +88,14 @@ class NodeInterface(ABC):
         options: Optional[dict] = None,
     ) -> dict:
         """Add inputs to fund transaction, return hex and fee."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def get_new_address(self, label: str = "") -> str:
         """Generate new receiving address."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     async def estimate_fee(self, conf_target: int = 6) -> float:
         """Estimate fee rate in BTC/kB."""
-        pass
+        pass  # pragma: no cover

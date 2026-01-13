@@ -7,7 +7,7 @@ from typing import Optional
 
 try:
     import tomli
-except ImportError:
+except ImportError:  # pragma: no cover
     import tomllib as tomli  # Python 3.11+
 
 
